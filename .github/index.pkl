@@ -33,7 +33,7 @@ local test: Workflow = new {
             `check-latest` = true
           }
         }
-        new SetupPkl { version = "0.31.0" }.step
+        new SetupPkl { version = "0.32.0" }.step
         new {
           name = "go generate"
           run =
@@ -73,10 +73,10 @@ dependabot {
   updates {
     new {
       `package-ecosystem` = "gomod"
-      directories {
-        "/buildtimeeval"
-        "/simple"
-      }
+      directories =
+        read*("../*/go.mod").keys
+          .map((it) -> it.replaceFirst("..", "").replaceLast("/go.mod", ""))
+          .toListing()
       cooldown {
         `default-days` = 7
         exclude {
@@ -84,7 +84,10 @@ dependabot {
         }
       }
       schedule {
-        interval = "weekly"
+        interval = "quarterly"
+      }
+      groups {
+        ["all"] { `group-by` = "dependency-name" }
       }
     }
   }
